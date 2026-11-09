@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <title>宇智速 AI 工作室｜YZSU</title>
+  <link rel="icon" href="assets/favicon-64.png">
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+  <meta name="description" content="你的方式不用改，讓電腦配合你。點餐收銀、LINE AI 客服、客製化記帳與報表、線上記帳整理。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05080f;
+      --bg-elev: #0a101c;
+      --bg-card: rgba(12, 20, 36, 0.82);
+      --line: rgba(0, 229, 255, 0.18);
+      --neon: #00e5ff;
+      --neon-soft: #4de8ff;
+      --neon-dim: rgba(0, 229, 255, 0.45);
+      --accent: #7c5cff;
+      --text: #e8f4ff;
+      --muted: #8fa3b8;
+      --ok: #3dffb5;
+      --warn: #ffb84d;
+      --radius: 18px;
+      --max: 1080px;
+      --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button, .btn { font-family: inherit; cursor: pointer; border: none; }
+
+    /* Background grid + glow */
+    .bg-fx {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 180, 255, 0.18), transparent 55%),
+        radial-gradient(ellipse 40% 30% at 90% 20%, rgba(124, 92, 255, 0.12), transparent 50%),
+        radial-gradient(ellipse 35% 25% at 10% 70%, rgba(0, 229, 255, 0.08), transparent 50%),
+        var(--bg);
+    }
+    .bg-fx::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+      pointer-events: none;
+    }
+    .bg-fx::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(0, 229, 255, 0.55) 0.8px, transparent 1.2px);
+      background-size: 72px 72px;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin-inline: auto;
+    }
+
+    /* Nav */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(5, 8, 15, 0.72);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 0.55rem;
+    }
+    .brand-cn {
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+    }
+    .brand-en {
+      font-size: 0.68rem;
+      letter-spacing: 0.42em;
+      color: var(--neon-dim);
+      font-weight: 500;
+      transform: translateY(-1px);
+    }
+    .nav-link {
+      font-size: 0.88rem;
+      color: var(--muted);
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .nav-link:hover {
+      color: var(--neon);
+      border-color: rgba(0, 229, 255, 0.25);
+      background: rgba(0, 229, 255, 0.06);
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+    .menu-btn {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--neon);
+      background: rgba(0, 229, 255, 0.06);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      box-shadow: 0 0 18px rgba(0, 229, 255, 0.12);
+      font-size: 1.25rem;
+      line-height: 1;
+      transition: background .2s, border-color .2s, box-shadow .2s, transform .15s;
+    }
+    .menu-btn:hover {
+      background: rgba(0, 229, 255, 0.14);
+      border-color: rgba(0, 229, 255, 0.55);
+      box-shadow: 0 0 28px rgba(0, 229, 255, 0.25);
+    }
+    .menu-btn:active { transform: scale(0.96); }
+    .menu-btn[aria-expanded="true"] {
+      background: rgba(0, 229, 255, 0.16);
+      border-color: rgba(0, 229, 255, 0.7);
+    }
+
+    /* Side drawer */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(2, 6, 14, 0.62);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .28s ease;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .drawer {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      width: min(82vw, 320px);
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(8, 16, 30, 0.98), rgba(5, 10, 20, 0.98));
+      border-right: 1px solid rgba(0, 229, 255, 0.28);
+      box-shadow: 0 0 40px rgba(0, 180, 255, 0.12), 12px 0 48px rgba(0,0,0,0.45);
+      transform: translateX(-105%);
+      transition: transform .3s cubic-bezier(.22,.8,.28,1);
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 0 1.4rem;
+    }
+    body.menu-open { overflow: hidden; }
+    body.menu-open .drawer-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    body.menu-open .drawer {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.35rem 1rem 0.9rem;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.12);
+      margin-bottom: 0.55rem;
+    }
+    .drawer-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+    }
+    .drawer-brand .brand-cn { font-size: 1.05rem; }
+    .drawer-brand .brand-en { font-size: 0.62rem; letter-spacing: 0.38em; }
+    .drawer-close {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      color: var(--neon);
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.28);
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+    .drawer-close:hover {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: rgba(0, 229, 255, 0.5);
+    }
+    .drawer-nav {
+      display: flex;
+      flex-direction: column;
+      padding: 0.35rem 0.75rem;
+      gap: 0.25rem;
+    }
+    .drawer-nav a {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0.7rem 0.95rem;
+      border-radius: 14px;
+      color: #d7ebff;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: 1px solid transparent;
+      transition: background .18s, border-color .18s, color .18s, box-shadow .18s;
+    }
+    .drawer-nav a:hover,
+    .drawer-nav a:focus-visible {
+      color: var(--neon);
+      background: rgba(0, 229, 255, 0.08);
+      border-color: rgba(0, 229, 255, 0.28);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
+      outline: none;
+    }
+    .drawer-nav a.is-cta {
+      margin-top: 0.45rem;
+      color: #021018;
+      background: linear-gradient(135deg, #7dfff0, #00d4ff 45%, #5a8cff);
+      border-color: transparent;
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.28);
+    }
+    .drawer-nav a.is-cta:hover {
+      color: #021018;
+      filter: brightness(1.05);
+    }
+    .drawer-foot {
+      margin-top: auto;
+      padding: 1rem 1.2rem 0.2rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.28em;
+    }
+
+    /* Works / News cards */
+    .case-list {
+      display: grid;
+      gap: 1rem;
+    }
+    @media (min-width: 760px) {
+      .case-list { grid-template-columns: repeat(2, 1fr); }
+    }
+    .case-card {
+      padding: 1.3rem 1.2rem 1.35rem;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      position: relative;
+      overflow: hidden;
+    }
+    .case-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 1.2rem; right: 1.2rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent);
+    }
+    .case-card h3 {
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+    .case-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .case-card .card-action { margin-top: 1rem; }
+    .news-placeholder {
+      padding: 1.5rem 1.25rem;
+      border-radius: 22px;
+      border: 1px dashed rgba(0, 229, 255, 0.32);
+      background: rgba(0, 229, 255, 0.04);
+      text-align: center;
+    }
+    .news-placeholder p {
+      color: var(--muted);
+      font-size: 0.98rem;
+      max-width: 28em;
+      margin-inline: auto;
+      line-height: 1.65;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 3.2rem 0 3.6rem;
+      text-align: center;
+      position: relative;
+    }
+    .hero-frame {
+      position: relative;
+      padding: 2.4rem 1.2rem 2.6rem;
+      border-radius: 28px;
+      border: 1px solid rgba(0, 229, 255, 0.22);
+      background:
+        linear-gradient(180deg, rgba(10, 22, 40, 0.7), rgba(8, 12, 22, 0.35));
+      box-shadow:
+        0 0 0 1px rgba(0, 229, 255, 0.05) inset,
+        0 0 60px rgba(0, 180, 255, 0.08),
+        0 24px 60px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .hero-frame::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon), transparent);
+      opacity: 0.7;
+    }
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--neon-soft);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1.1rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 229, 255, 0.28);
+      background: rgba(0, 229, 255, 0.06);
+    }
+    .hero-kicker .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 10px var(--neon);
+    }
+    .hero-title {
+      font-size: clamp(3.2rem, 14vw, 5.6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: 0.14em;
+      margin-left: 0.14em; /* optical balance for letter-spacing */
+      text-shadow:
+        0 0 12px rgba(0, 229, 255, 0.55),
+        0 0 40px rgba(0, 180, 255, 0.28),
+        0 0 80px rgba(124, 92, 255, 0.18);
+      background: linear-gradient(180deg, #f4fbff 10%, #9befff 55%, #4cc8ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 1px rgba(0, 229, 255, 0.4));
+    }
+    .hero-en {
+      margin-top: 0.55rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.55em;
+      margin-left: 0.55em;
+      color: rgba(0, 229, 255, 0.55);
+      font-weight: 500;
+    }
+    .hero-tag {
+      margin-top: 1.35rem;
+      font-size: clamp(1.05rem, 3.6vw, 1.35rem);
+      font-weight: 500;
+      color: #d7ebff;
+      max-width: 22em;
+      margin-inline: auto;
+      line-height: 1.55;
+    }
+    .hero-sub {
+      margin-top: 0.7rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 28em;
+      margin-inline: auto;
+    }
+    .hero-cta {
+      margin-top: 1.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+    @media (max-width: 420px) {
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn { width: 100%; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 48px;
+      padding: 0.75rem 1.35rem;
+      border-radius: 999px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      color: #021018;
+      background: linear-gradient(135deg, #7dfff0, #00d4ff 45%, #5a8cff);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.15) inset,
+        0 0 28px rgba(0, 229, 255, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.2) inset,
+        0 0 40px rgba(0, 229, 255, 0.5);
+    }
+    .btn-ghost {
+      color: var(--neon-soft);
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+    }
+    .btn-ghost:hover {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: rgba(0, 229, 255, 0.55);
+    }
+    .btn-sm {
+      min-height: 40px;
+      padding: 0.5rem 1rem;
+      font-size: 0.88rem;
+    }
+
+    /* Sections */
+    section { padding: 2.6rem 0; }
+    .section-head {
+      margin-bottom: 1.4rem;
+    }
+    .section-head h2 {
+      font-size: clamp(1.45rem, 4.5vw, 1.85rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+    }
+    .section-head p {
+      margin-top: 0.4rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      color: var(--neon-dim);
+      margin-bottom: 0.35rem;
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .cards { grid-template-columns: repeat(2, 1fr); }
+    }
+    .card {
+      position: relative;
+      padding: 1.35rem 1.25rem 1.4rem;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 1.2rem; right: 1.2rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent);
+    }
+    .card-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      margin-bottom: 0.9rem;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.22);
+      color: var(--neon);
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+    .card h3 {
+      font-size: 1.12rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.45rem;
+    }
+    .card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .card ul {
+      margin-top: 0.75rem;
+      padding-left: 1.05rem;
+      color: #b9cde0;
+      font-size: 0.9rem;
+    }
+    .card li { margin: 0.25rem 0; }
+    .card .card-action { margin-top: 1.1rem; }
+
+    /* Demo report */
+    .demo {
+      margin-top: 0.4rem;
+      border-radius: 22px;
+      border: 1px solid rgba(0, 229, 255, 0.22);
+      background: linear-gradient(160deg, rgba(12,22,40,0.95), rgba(8,12,22,0.9));
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .demo-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.12);
+      background: rgba(0, 229, 255, 0.04);
+    }
+    .demo-bar strong { font-size: 0.95rem; letter-spacing: 0.04em; }
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #021018;
+      background: linear-gradient(90deg, #ffd56a, #ffb84d);
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .demo-body { padding: 1.15rem 1.1rem 1.35rem; }
+    .demo-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem 1.1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+    }
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    @media (min-width: 640px) {
+      .kpi { grid-template-columns: repeat(4, 1fr); }
+    }
+    .kpi-item {
+      padding: 0.85rem 0.8rem;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0, 229, 255, 0.12);
+    }
+    .kpi-item span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .kpi-item strong {
+      font-size: 1.15rem;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      min-width: 420px;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.65rem 0.55rem;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+    }
+    td { font-variant-numeric: tabular-nums; }
+    .num { text-align: right; }
+    .demo-note {
+      margin-top: 0.95rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* Steps */
+    .steps {
+      display: grid;
+      gap: 0.85rem;
+      counter-reset: step;
+    }
+    @media (min-width: 860px) {
+      .steps { grid-template-columns: repeat(4, 1fr); }
+    }
+    .step {
+      position: relative;
+      padding: 1.2rem 1.1rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: rgba(10, 16, 28, 0.75);
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 28px; height: 28px;
+      border-radius: 9px;
+      margin-bottom: 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 900;
+      color: #021018;
+      background: linear-gradient(135deg, var(--neon), #5a8cff);
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+    }
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.03em;
+    }
+    .step p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    /* Contact */
+    .contact-panel {
+      padding: 1.6rem 1.25rem;
+      border-radius: 22px;
+      border: 1px solid rgba(0, 229, 255, 0.24);
+      background:
+        radial-gradient(ellipse 70% 80% at 100% 0%, rgba(124,92,255,0.15), transparent 50%),
+        radial-gradient(ellipse 60% 70% at 0% 100%, rgba(0,229,255,0.1), transparent 50%),
+        rgba(10, 16, 28, 0.85);
+      text-align: center;
+    }
+    .contact-panel h2 {
+      font-size: clamp(1.35rem, 4vw, 1.7rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+    }
+    .contact-panel > p {
+      margin: 0.55rem auto 1.25rem;
+      color: var(--muted);
+      max-width: 28em;
+      font-size: 0.95rem;
+    }
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .email-placeholder {
+      display: inline-block;
+      margin-top: 0.35rem;
+      padding: 0.55rem 1rem;
+      border-radius: 12px;
+      border: 1px dashed rgba(0, 229, 255, 0.28);
+      color: var(--muted);
+      font-size: 0.9rem;
+      background: rgba(0,0,0,0.18);
+    }
+
+    /* Footer */
+    footer {
+      padding: 2rem 0 2.6rem;
+      border-top: 1px solid rgba(0, 229, 255, 0.1);
+      margin-top: 1rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .footer-brand {
+      font-weight: 700;
+      color: #c5d8ea;
+      letter-spacing: 0.06em;
+    }
+    .footer-en {
+      letter-spacing: 0.4em;
+      font-size: 0.7rem;
+      color: rgba(0, 229, 255, 0.4);
+      margin-left: 0.4em;
+    }
+
+    /* Lock callout inside how-it-works note */
+    .lock-note {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 184, 77, 0.28);
+      background: rgba(255, 184, 77, 0.06);
+      color: #f0d7a8;
+      font-size: 0.88rem;
+    }
+
+    @media (min-width: 760px) {
+      .hero { padding: 4.2rem 0 4.4rem; }
+      .hero-frame { padding: 3.2rem 2rem 3.4rem; }
+    }
+    .brand-logo{width:36px;height:36px;border-radius:50%;box-shadow:0 0 12px rgba(120,90,255,.6);flex:none}
+  .brand{display:inline-flex;align-items:center;gap:10px}
+</style>
+</head>
+<body>
+  <div class="bg-fx" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="nav-left">
+        <button type="button" class="menu-btn" id="menu-btn" aria-label="開啟選單" aria-expanded="false" aria-controls="side-drawer">☰</button>
+        <a class="brand" href="#top" aria-label="宇智速 AI 工作室">
+          <img class="brand-logo" src="assets/logo-192.png" alt="" width="36" height="36">
+          <span class="brand-cn">宇智速</span>
+          <span class="brand-en">YZSU</span>
+        </a>
+      </div>
+      <a class="nav-link" href="#line">聯絡</a>
+    </div>
+  </header>
+
+  <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
+  <aside class="drawer" id="side-drawer" role="dialog" aria-modal="true" aria-label="網站選單" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="drawer-brand">
+        <span class="brand-cn">宇智速</span>
+        <span class="brand-en">YZSU</span>
+      </div>
+      <button type="button" class="drawer-close" id="drawer-close" aria-label="關閉選單">✕</button>
+    </div>
+    <nav class="drawer-nav" aria-label="主要選單">
+      <a href="#top" data-menu-link>首頁</a>
+      <a href="#services" data-menu-link>服務項目</a>
+      <a href="#works" data-menu-link>作品案例</a>
+      <a href="#news" data-menu-link>科技新知</a>
+      <a href="#how" data-menu-link class="is-cta">免費試用 30 天</a>
+      <a href="#line" data-menu-link>聯絡我們</a>
+    </nav>
+    <div class="drawer-foot">MENU</div>
+  </aside>
+
+  <main id="top">
+    <!-- 1. Hero -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-frame">
+          <div class="hero-kicker"><span class="dot" aria-hidden="true"></span>AI 應用開發</div>
+          <h1 class="hero-title">宇智速</h1>
+          <p class="hero-en">Y Z S U</p>
+          <p class="hero-tag">你的方式不用改，讓電腦配合你</p>
+          <p class="hero-sub">個人工作室｜點餐收銀 · LINE AI 客服 · 客製化記帳與報表 · 線上記帳整理</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#how">免費試用 30 天</a>
+            <!-- TODO: 之後換成 LINE 官方帳號連結 -->
+            <a class="btn btn-ghost" href="#line" id="line-cta-top">LINE 智能客服</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Services -->
+    <section id="services">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">SERVICES</span>
+          <h2>我們幫你做什麼</h2>
+          <p>傳統做法先保留，再用電腦把重複的事變輕鬆、變自動。</p>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">01</div>
+            <h3>點餐收銀系統</h3>
+            <p>依店家流程客製的點餐與後台，客人好點、店員好管。</p>
+            <ul>
+              <li>客人線上點餐</li>
+              <li>後台管理與預覽</li>
+              <li>照你店裡的習慣調整</li>
+            </ul>
+            <div class="card-action">
+              <a class="btn btn-ghost btn-sm" href="https://yzsueuudpwos-lab.github.io/lianyuan/" target="_blank" rel="noopener noreferrer">看實際案例：蓮緣</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">02</div>
+            <h3>LINE AI 客服</h3>
+            <p>自動回覆常見問題，並把客人需求整理成重點留給你。</p>
+            <ul>
+              <li>24 小時先接住客人</li>
+              <li>整理詢問重點</li>
+              <li>需要時再轉給你處理</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">03</div>
+            <h3>客製化記帳與報表</h3>
+            <p>照你原本的單據和報表格式來設計，不用改掉習慣的做法。</p>
+            <ul>
+              <li>你要什麼報表就呈現什麼</li>
+              <li>單據格式照你的來</li>
+              <li>讓對帳與結算更輕鬆、更自動</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">04</div>
+            <h3>缺會計嗎？線上幫你做帳</h3>
+            <p>單據拍照傳過來，我們幫你整理成你要的報表；帳亂了、做不好的，幫你理清楚。</p>
+            <ul>
+              <li>單據拍照上傳即可</li>
+              <li>整理成你要的報表格式</li>
+              <li>帳目亂了幫你理清楚</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Works -->
+    <section id="works">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">WORKS</span>
+          <h2>作品案例</h2>
+          <p>真實做過的東西，先看再說。</p>
+        </div>
+        <div class="case-list">
+          <article class="case-card">
+            <h3>蓮緣素食餐坊｜點餐網站</h3>
+            <p>依店家流程客製的線上點餐與後台預覽，客人好點、店員好管。</p>
+            <div class="card-action">
+              <a class="btn btn-ghost btn-sm" href="https://yzsueuudpwos-lab.github.io/lianyuan/" target="_blank" rel="noopener noreferrer">打開蓮緣點餐網站</a>
+            </div>
+          </article>
+          <article class="case-card">
+            <h3>LINE AI 客服</h3>
+            <p>幫店家接住常見詢問、自動回覆，並把客人需求整理成重點留給主人處理。此案例為實際服務說明，暫不另附公開連結。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Demo report (fake data) -->
+    <section id="demo">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">PREVIEW</span>
+          <h2>客製化報表示意</h2>
+          <p>以下為假資料範例畫面，僅示意「照你要的格式呈現」。</p>
+        </div>
+
+        <div class="demo" aria-label="客製化月報表示意卡（範例畫面）">
+          <div class="demo-bar">
+            <strong>月結報表｜示範店家</strong>
+            <span class="badge">範例畫面</span>
+          </div>
+          <div class="demo-body">
+            <div class="demo-meta">
+              <span>期間：2026 / 10</span>
+              <span>幣別：TWD</span>
+              <span>資料來源：示範單據（非真實資料）</span>
+            </div>
+            <div class="kpi">
+              <div class="kpi-item"><span>本月營收</span><strong>328,500</strong></div>
+              <div class="kpi-item"><span>本月支出</span><strong>186,240</strong></div>
+              <div class="kpi-item"><span>結餘</span><strong>142,260</strong></div>
+              <div class="kpi-item"><span>單據筆數</span><strong>86</strong></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>項目</th>
+                    <th>類別</th>
+                    <th class="num">金額</th>
+                    <th>備註</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>內用點餐</td>
+                    <td>收入</td>
+                    <td class="num">214,800</td>
+                    <td>依日結單彙總</td>
+                  </tr>
+                  <tr>
+                    <td>外帶／外送</td>
+                    <td>收入</td>
+                    <td class="num">113,700</td>
+                    <td>含平台手續費前</td>
+                  </tr>
+                  <tr>
+                    <td>食材採購</td>
+                    <td>支出</td>
+                    <td class="num">92,450</td>
+                    <td>對應進貨單</td>
+                  </tr>
+                  <tr>
+                    <td>人事相關</td>
+                    <td>支出</td>
+                    <td class="num">68,000</td>
+                    <td>依店家自訂欄位</td>
+                  </tr>
+                  <tr>
+                    <td>水電／雜支</td>
+                    <td>支出</td>
+                    <td class="num">25,790</td>
+                    <td>可改成你的科目</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="demo-note">※ 此為範例畫面，數字與店名皆為虛構。實際上線時，欄位、科目與報表樣式會依你提供的單據與每月要出的報表客製。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. How we work -->
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">PROCESS</span>
+          <h2>怎麼合作</h2>
+          <p>先了解你現在怎麼做，再讓系統配合你。</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <h3>聊你現在怎麼做</h3>
+            <p>可透過 LINE 智能客服。AI 會先問清楚需求，並請你列出現在用的報表、每個月要出的報表。</p>
+          </article>
+          <article class="step">
+            <h3>照你的方式客製化</h3>
+            <p>單據格式、報表欄位、工作流程都依你原本的習慣調整，不用先改變做法。</p>
+          </article>
+          <article class="step">
+            <h3>免費試用 30 天</h3>
+            <p>實際跑完一個月的工作，確認報表與操作都合用。</p>
+          </article>
+          <article class="step">
+            <h3>滿意再繼續使用</h3>
+            <p>試用期滿系統會自動鎖住；若要繼續使用功能，請聯絡我們開通。</p>
+          </article>
+        </div>
+        <div class="lock-note">
+          試用結束後，網頁 App 會自動鎖住並提示「要繼續使用請聯絡我們」——先體驗再決定，不用一開始就承諾長期付費。
+        </div>
+      </div>
+    </section>
+
+
+    <!-- News placeholder -->
+    <section id="news">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">NEWS</span>
+          <h2>科技新知</h2>
+        </div>
+        <div class="news-placeholder">
+          <p>即將推出：AI、手機與新科技，用老闆聽得懂的話解說</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Contact -->
+    <section id="line">
+      <div class="wrap">
+        <div class="contact-panel">
+          <span class="eyebrow">CONTACT</span>
+          <h2>先跟我們聊聊</h2>
+          <p>點下方按鈕進入 LINE 智能客服。AI 會幫你留下需求重點，也會請你列出目前與每月要出的報表。</p>
+          <div class="contact-actions">
+            <!-- TODO: 之後換成 LINE 官方帳號連結 -->
+            <a class="btn btn-primary" href="#line">LINE 智能客服</a>
+          </div>
+          <a class="email-placeholder" href="mailto:yzsu.studio@gmail.com" style="color:inherit">yzsu.studio@gmail.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. Footer -->
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">© 2026 宇智速 AI 工作室</div>
+      <div class="footer-en">YZSU</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var body = document.body;
+      var btn = document.getElementById("menu-btn");
+      var drawer = document.getElementById("side-drawer");
+      var overlay = document.getElementById("drawer-overlay");
+      var closeBtn = document.getElementById("drawer-close");
+      var lastFocus = null;
+
+      function openMenu() {
+        lastFocus = document.activeElement;
+        body.classList.add("menu-open");
+        drawer.setAttribute("aria-hidden", "false");
+        overlay.setAttribute("aria-hidden", "false");
+        btn.setAttribute("aria-expanded", "true");
+        btn.setAttribute("aria-label", "關閉選單");
+        closeBtn.focus();
+      }
+
+      function closeMenu() {
+        body.classList.remove("menu-open");
+        drawer.setAttribute("aria-hidden", "true");
+        overlay.setAttribute("aria-hidden", "true");
+        btn.setAttribute("aria-expanded", "false");
+        btn.setAttribute("aria-label", "開啟選單");
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      function toggleMenu() {
+        if (body.classList.contains("menu-open")) closeMenu();
+        else openMenu();
+      }
+
+      btn.addEventListener("click", toggleMenu);
+      closeBtn.addEventListener("click", closeMenu);
+      overlay.addEventListener("click", closeMenu);
+
+      document.querySelectorAll("[data-menu-link]").forEach(function (el) {
+        el.addEventListener("click", function () {
+          closeMenu();
+        });
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && body.classList.contains("menu-open")) {
+          closeMenu();
+        }
+      });
+
+      // Soft highlight when jumping to #line (placeholder until real LINE URL)
+      document.querySelectorAll('a[href="#line"]').forEach(function (el) {
+        el.addEventListener("click", function () {
+          var panel = document.querySelector(".contact-panel");
+          if (!panel) return;
+          panel.style.transition = "box-shadow .35s ease";
+          panel.style.boxShadow = "0 0 0 1px rgba(0,229,255,0.45), 0 0 40px rgba(0,229,255,0.2)";
+          setTimeout(function () { panel.style.boxShadow = ""; }, 900);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
