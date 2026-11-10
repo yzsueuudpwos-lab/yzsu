@@ -8,6 +8,20 @@
   <link rel="icon" href="assets/favicon-64.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
   <meta name="description" content="你的方式不用改，讓電腦配合你。點餐收銀、LINE AI 客服、客製化記帳與報表、線上記帳整理。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:site_name" content="宇智速 AI 工作室" />
+  <meta property="og:title" content="宇智速 AI 工作室｜YZSU" />
+  <meta property="og:description" content="你的方式不用改，讓電腦配合你。點餐收銀、LINE AI 客服、客製化記帳與報表、線上記帳整理。" />
+  <meta property="og:url" content="https://yzsueuudpwos-lab.github.io/yzsu/" />
+  <meta property="og:image" content="https://yzsueuudpwos-lab.github.io/yzsu/assets/logo-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="宇智速 AI 工作室" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="宇智速 AI 工作室｜YZSU" />
+  <meta name="twitter:description" content="你的方式不用改，讓電腦配合你。點餐收銀、LINE AI 客服、客製化記帳與報表、線上記帳整理。" />
+  <meta name="twitter:image" content="https://yzsueuudpwos-lab.github.io/yzsu/assets/logo-512.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
@@ -805,7 +819,6 @@
           <p class="hero-sub">個人工作室｜點餐收銀 · LINE AI 客服 · 客製化記帳與報表 · 線上記帳整理</p>
           <div class="hero-cta">
             <a class="btn btn-primary" href="#how">免費試用 30 天</a>
-            <!-- TODO: 之後換成 LINE 官方帳號連結 -->
             <a class="btn btn-ghost" href="https://line.me/R/ti/p/@551nbgfj" target="_blank" rel="noopener" id="line-cta-top">LINE 智能客服</a>
           </div>
         </div>
@@ -844,6 +857,9 @@
               <li>整理詢問重點</li>
               <li>需要時再轉給你處理</li>
             </ul>
+            <div class="card-action">
+              <a class="btn btn-ghost btn-sm" href="https://line.me/R/ti/p/@551nbgfj" target="_blank" rel="noopener">加 LINE 智能客服</a>
+            </div>
           </article>
 
           <article class="card">
@@ -860,7 +876,7 @@
           <article class="card">
             <div class="card-icon" aria-hidden="true">04</div>
             <h3>缺會計嗎？線上幫你做帳</h3>
-            <p>單據拍照傳過來，我們幫你整理成你要的報表；帳亂了、做不好的，幫你理清楚。</p>
+            <p>單據拍照傳過來，我們幫你整理成你要的報表；帳亂了、做不好的，幫你理清楚。只做線上整理與報表，不提供報稅。</p>
             <ul>
               <li>單據拍照上傳即可</li>
               <li>整理成你要的報表格式</li>
@@ -889,7 +905,10 @@
           </article>
           <article class="case-card">
             <h3>LINE AI 客服</h3>
-            <p>幫店家接住常見詢問、自動回覆，並把客人需求整理成重點留給主人處理。此案例為實際服務說明，暫不另附公開連結。</p>
+            <p>幫店家接住常見詢問、自動回覆，並把客人需求整理成重點留給主人處理。</p>
+            <div class="card-action">
+              <a class="btn btn-ghost btn-sm" href="https://line.me/R/ti/p/@551nbgfj" target="_blank" rel="noopener">加 LINE 智能客服</a>
+            </div>
           </article>
         </div>
       </div>
@@ -1025,7 +1044,6 @@
           <h2>先跟我們聊聊</h2>
           <p>點下方按鈕進入 LINE 智能客服。AI 會幫你留下需求重點，也會請你列出目前與每月要出的報表。</p>
           <div class="contact-actions">
-            <!-- TODO: 之後換成 LINE 官方帳號連結 -->
             <a class="btn btn-primary" href="https://line.me/R/ti/p/@551nbgfj" target="_blank" rel="noopener">LINE 智能客服</a>
           </div>
           <a class="email-placeholder" href="mailto:yzsu.studio@gmail.com" style="color:inherit">yzsu.studio@gmail.com</a>
@@ -1091,7 +1109,7 @@
         }
       });
 
-      // Soft highlight when jumping to #line (placeholder until real LINE URL)
+      // Soft highlight when jumping to #line
       document.querySelectorAll('a[href="#line"]').forEach(function (el) {
         el.addEventListener("click", function () {
           var panel = document.querySelector(".contact-panel");
