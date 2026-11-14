@@ -762,6 +762,16 @@
       font-size: 0.88rem;
     }
 
+
+    /* 給小店的三件事（預覽包，尚未上線） */
+    #offers { scroll-margin-top: 76px; }
+    #offers .cards {
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 860px) {
+      #offers .cards { grid-template-columns: repeat(3, 1fr); }
+    }
+
     @media (min-width: 760px) {
       .hero { padding: 4.2rem 0 4.4rem; }
       .hero-frame { padding: 3.2rem 2rem 3.4rem; }
@@ -799,6 +809,7 @@
     <nav class="drawer-nav" aria-label="主要選單">
       <a href="#top" data-menu-link>首頁</a>
       <a href="#services" data-menu-link>服務項目</a>
+      <a href="#offers" data-menu-link>給小店的三件事</a>
       <a href="#works" data-menu-link>作品案例</a>
       <a href="#news" data-menu-link>科技新知</a>
       <a href="#how" data-menu-link class="is-cta">免費試用 30 天</a>
@@ -881,6 +892,53 @@
               <li>單據拍照上傳即可</li>
               <li>整理成你要的報表格式</li>
               <li>帳目亂了幫你理清楚</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 給小店的三件事（文案預覽，尚未上線） -->
+    <section id="offers">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">FOR SHOPS</span>
+          <h2>給小店的三件事</h2>
+          <p>線上記帳、每天幫你整理，還有 LINE 客服提醒。重要的決定都留給你自己按確認。</p>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">01</div>
+            <h3>幫你找出漏收、漏記的錢</h3>
+            <p>線上記帳不只是把帳記下來。我們會幫你看看，有沒有該收卻還沒收到的錢，或是做了卻沒記進去的帳。只做線上整理與報表，不提供報稅。</p>
+            <ul>
+              <li>該收的有沒有漏收</li>
+              <li>做過的有沒有漏記</li>
+              <li>只做線上整理與報表，不提供報稅</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">02</div>
+            <h3>小店方案</h3>
+            <p>每天幫你整理摘要、準備回覆草稿，再加簡單記帳。重要的事都留給老闆自己按確認，不會擅自幫你決定。小店可以先免費開始，等生意比較穩定了，再一起談怎麼收費。</p>
+            <ul>
+              <li>每日摘要</li>
+              <li>回覆草稿</li>
+              <li>簡單記帳，重要的由你按確認</li>
+              <li>先免費開始，生意穩定了再談收費</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">03</div>
+            <h3>LINE 客服也可以加提醒</h3>
+            <p>除了自動回覆常見問題，還可以加上預約提醒或前一天提醒，以及該收款時的催款通知。</p>
+            <ul>
+              <li>預約提醒或前一天提醒</li>
+              <li>催款通知</li>
+              <li>需要時再轉給你處理</li>
             </ul>
           </article>
         </div>
