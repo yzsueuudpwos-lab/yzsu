@@ -644,44 +644,183 @@
     }
 
     /* Steps */
-    .steps {
-      display: grid;
-      gap: 0.85rem;
-      counter-reset: step;
+    /* 怎麼合作：吸附＋畫線（預覽，只改此區塊） */
+    #how { scroll-margin-top: 76px; }
+    .flow {
+      margin-top: 0.15rem;
     }
-    @media (min-width: 860px) {
-      .steps { grid-template-columns: repeat(4, 1fr); }
-    }
-    .step {
+    .flow-scroller {
       position: relative;
-      padding: 1.2rem 1.1rem 1.25rem;
-      border-radius: var(--radius);
+      height: min(72svh, 640px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      border-radius: 24px;
       border: 1px solid var(--line);
-      background: rgba(10, 16, 28, 0.75);
+      background: rgba(8, 12, 22, 0.55);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28) inset, 0 0 0 1px rgba(0, 229, 255, 0.04);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 229, 255, 0.35) transparent;
     }
-    .step::before {
-      counter-increment: step;
-      content: counter(step);
+    .flow-scroller::-webkit-scrollbar { width: 6px; }
+    .flow-scroller::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.28);
+      border-radius: 99px;
+    }
+    .flow-list { position: relative; }
+    .flow-rail {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .flow-rail-dash {
+      position: absolute;
+      inset: 0;
+      border-left: 2px dashed rgba(0, 229, 255, 0.32);
+      margin-left: 0.5px;
+    }
+    .flow-rail-solid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 0;
+      border-radius: 3px;
+      background: linear-gradient(180deg, var(--neon), var(--accent));
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+      transform-origin: top center;
+    }
+    .flow-rail-solid.is-animating {
+      transition: height 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .flow-item {
+      position: relative;
+      z-index: 1;
       display: grid;
-      place-items: center;
-      width: 28px; height: 28px;
-      border-radius: 9px;
-      margin-bottom: 0.75rem;
-      font-size: 0.82rem;
+      grid-template-columns: 18px minmax(0, 1fr);
+      column-gap: 1rem;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      padding-inline: 1rem;
+    }
+    .flow-item + .flow-item { margin-top: 1.6rem; }
+    .flow-node {
+      width: 14px;
+      height: 14px;
+      justify-self: center;
+      border-radius: 50%;
+      background: #0b1220;
+      border: 2px solid rgba(0, 229, 255, 0.4);
+      box-shadow: 0 0 0 4px rgba(5, 8, 15, 0.9);
+      transition: background .35s ease, border-color .35s ease, transform .4s cubic-bezier(.22,1.2,.36,1), box-shadow .35s ease;
+    }
+    .flow-item.is-passed .flow-node,
+    .flow-item.is-active .flow-node {
+      border-color: var(--flow-tone, var(--neon));
+      background: var(--flow-tone, var(--neon));
+      box-shadow: 0 0 0 4px rgba(5, 8, 15, 0.9), 0 0 12px color-mix(in srgb, var(--flow-tone, var(--neon)) 70%, transparent);
+    }
+    .flow-item.is-active .flow-node {
+      transform: scale(1.28);
+    }
+    .flow-item[data-tone="accent"] { --flow-tone: #9b87ff; }
+    .flow-item[data-tone="ok"] { --flow-tone: #3dffb5; }
+    .flow-item[data-tone="warn"] { --flow-tone: #ffb84d; }
+    .flow-item[data-tone="neon"] { --flow-tone: #00e5ff; }
+    .flow-card {
+      border-radius: 28px;
+      padding: 1.35rem 1.25rem 1.45rem;
+      background: rgba(10, 16, 28, 0.88);
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+      color: var(--text);
+      transform: scale(0.96);
+      transform-origin: left center;
+      transition: transform .45s cubic-bezier(.22,1.15,.36,1), background .35s ease, color .35s ease, border-color .35s ease, box-shadow .45s ease;
+    }
+    .flow-card .flow-kicker {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--neon-dim);
+      margin-bottom: 0.45rem;
+    }
+    .flow-card h3 {
+      font-size: 1.15rem;
       font-weight: 900;
-      color: #021018;
-      background: linear-gradient(135deg, var(--neon), #5a8cff);
-      box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+      line-height: 1.35;
     }
-    .step h3 {
-      font-size: 1rem;
-      font-weight: 800;
-      margin-bottom: 0.35rem;
-      letter-spacing: 0.03em;
-    }
-    .step p {
+    .flow-card p {
       color: var(--muted);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .flow-item.is-active .flow-card {
+      transform: scale(1);
+      border-color: color-mix(in srgb, var(--flow-tone, var(--neon)) 55%, transparent);
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.35),
+        0 0 0 1px color-mix(in srgb, var(--flow-tone, var(--neon)) 30%, transparent),
+        0 12px 36px color-mix(in srgb, var(--flow-tone, var(--neon)) 22%, transparent);
+    }
+    .flow-item.is-active.is-bounce .flow-card {
+      animation: flow-bounce .7s cubic-bezier(.22,1.3,.36,1);
+    }
+    .flow-item[data-tone="accent"].is-active .flow-card {
+      background: #7c5cff;
+      color: #f7f3ff;
+      border-color: #9b87ff;
+    }
+    .flow-item[data-tone="ok"].is-active .flow-card {
+      background: #3dffb5;
+      color: #04231a;
+      border-color: #7affcc;
+    }
+    .flow-item[data-tone="warn"].is-active .flow-card {
+      background: #ffb84d;
+      color: #2a1a04;
+      border-color: #ffd28a;
+    }
+    .flow-item[data-tone="neon"].is-active .flow-card {
+      background: #00e5ff;
+      color: #021018;
+      border-color: #7af3ff;
+    }
+    .flow-item.is-active .flow-card .flow-kicker,
+    .flow-item.is-active .flow-card p {
+      color: inherit;
+    }
+    .flow-item.is-active .flow-card .flow-kicker { opacity: 0.78; }
+    .flow-item.is-active .flow-card p { opacity: 0.9; }
+    @keyframes flow-bounce {
+      0% { transform: scale(0.97); }
+      45% { transform: scale(1.035); }
+      100% { transform: scale(1); }
+    }
+    @media (min-width: 760px) {
+      .flow-scroller { height: min(70vh, 680px); }
+      .flow-item { grid-template-columns: 18px minmax(0, 40rem); }
+      .flow-card { padding: 1.55rem 1.5rem 1.65rem; }
+      .flow-card h3 { font-size: 1.28rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .flow-card, .flow-node, .flow-rail-solid {
+        transition: none !important;
+        animation: none !important;
+      }
+      .flow-item.is-active.is-bounce .flow-card { animation: none; }
+      .flow-rail-solid.is-animating { transition: none !important; }
     }
 
     /* Contact */
@@ -1056,23 +1195,47 @@
           <h2>怎麼合作</h2>
           <p>先了解你現在怎麼做，再讓系統配合你。</p>
         </div>
-        <div class="steps">
-          <article class="step">
-            <h3>聊你現在怎麼做</h3>
-            <p>可透過 LINE 智能客服。AI 會先問清楚需求，並請你列出現在用的報表、每個月要出的報表。</p>
-          </article>
-          <article class="step">
-            <h3>照你的方式客製化</h3>
-            <p>單據格式、報表欄位、工作流程都依你原本的習慣調整，不用先改變做法。</p>
-          </article>
-          <article class="step">
-            <h3>免費試用 30 天</h3>
-            <p>實際跑完一個月的工作，確認報表與操作都合用。</p>
-          </article>
-          <article class="step">
-            <h3>滿意再繼續使用</h3>
-            <p>試用期滿系統會自動鎖住；若要繼續使用功能，請聯絡我們開通。</p>
-          </article>
+        <div class="flow">
+          <div class="flow-scroller" id="flow-scroller" tabindex="0" aria-label="合作流程，上下滑動切換步驟">
+            <div class="flow-list" id="flow-list">
+              <div class="flow-rail" id="flow-rail" aria-hidden="true">
+                <div class="flow-rail-dash"></div>
+                <div class="flow-rail-solid" id="flow-rail-solid"></div>
+              </div>
+              <article class="flow-item" data-tone="accent" data-step="0">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">01</div>
+                  <h3>聊你現在怎麼做</h3>
+                  <p>可透過 LINE 智能客服。AI 會先問清楚需求，並請你列出現在用的報表、每個月要出的報表。</p>
+                </div>
+              </article>
+              <article class="flow-item" data-tone="ok" data-step="1">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">02</div>
+                  <h3>照你的方式客製化</h3>
+                  <p>單據格式、報表欄位、工作流程都依你原本的習慣調整，不用先改變做法。</p>
+                </div>
+              </article>
+              <article class="flow-item" data-tone="warn" data-step="2">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">03</div>
+                  <h3>免費試用 30 天</h3>
+                  <p>實際跑完一個月的工作，確認報表與操作都合用。</p>
+                </div>
+              </article>
+              <article class="flow-item" data-tone="neon" data-step="3">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">04</div>
+                  <h3>滿意再繼續使用</h3>
+                  <p>試用期滿系統會自動鎖住；若要繼續使用功能，請聯絡我們開通。</p>
+                </div>
+              </article>
+            </div>
+          </div>
         </div>
         <div class="lock-note">
           試用結束後，網頁 App 會自動鎖住並提示「要繼續使用請聯絡我們」——先體驗再決定，不用一開始就承諾長期付費。
@@ -1177,6 +1340,139 @@
           setTimeout(function () { panel.style.boxShadow = ""; }, 900);
         });
       });
+    })();
+
+    /* 怎麼合作：吸附後再畫線 */
+    (function () {
+      var scroller = document.getElementById("flow-scroller");
+      var list = document.getElementById("flow-list");
+      var rail = document.getElementById("flow-rail");
+      var solid = document.getElementById("flow-rail-solid");
+      if (!scroller || !list || !rail || !solid) return;
+
+      var items = Array.prototype.slice.call(list.querySelectorAll(".flow-item"));
+      var nodes = items.map(function (item) { return item.querySelector(".flow-node"); });
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var settleTimer = null;
+      var lastBounced = -1;
+      var lineIndex = -1;
+      var railStart = 0;
+      var nodeYs = [];
+
+      function nodeCenterInList(node) {
+        var listRect = list.getBoundingClientRect();
+        var r = node.getBoundingClientRect();
+        return (r.top + r.height / 2) - listRect.top;
+      }
+
+      function layout() {
+        var sh = scroller.clientHeight;
+        if (!items.length || sh < 40) return;
+        var firstH = items[0].offsetHeight;
+        var lastH = items[items.length - 1].offsetHeight;
+        list.style.paddingTop = Math.max(16, (sh - firstH) / 2) + "px";
+        list.style.paddingBottom = Math.max(16, (sh - lastH) / 2) + "px";
+
+        nodeYs = nodes.map(nodeCenterInList);
+        railStart = nodeYs[0];
+        var railEnd = nodeYs[nodeYs.length - 1];
+        var firstItem = items[0];
+        var nodeW = nodes[0].offsetWidth;
+        var itemRect = firstItem.getBoundingClientRect();
+        var listRect = list.getBoundingClientRect();
+        var nodeRect = nodes[0].getBoundingClientRect();
+        rail.style.left = (nodeRect.left + nodeRect.width / 2 - listRect.left - 1.5) + "px";
+        rail.style.top = railStart + "px";
+        rail.style.height = Math.max(0, railEnd - railStart) + "px";
+        setLineHeight(lineIndex < 0 ? 0 : lineHeightFor(lineIndex), false);
+      }
+
+      function lineHeightFor(index) {
+        if (!nodeYs.length) return 0;
+        var endIdx = index >= nodeYs.length - 1 ? nodeYs.length - 1 : index + 1;
+        return Math.max(0, nodeYs[endIdx] - railStart);
+      }
+
+      function setLineHeight(h, animate) {
+        solid.classList.toggle("is-animating", !!(animate && !reduced));
+        solid.style.height = h + "px";
+      }
+
+      function nearestIndex() {
+        var mid = scroller.scrollTop + scroller.clientHeight / 2;
+        var best = 0;
+        var bestDist = Infinity;
+        for (var i = 0; i < items.length; i++) {
+          var el = items[i];
+          var c = el.offsetTop + el.offsetHeight / 2;
+          var d = Math.abs(c - mid);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+        return best;
+      }
+
+      function setActive(index, bounce) {
+        items.forEach(function (el, i) {
+          el.classList.toggle("is-active", i === index);
+          el.classList.toggle("is-passed", i < index);
+          if (i !== index) el.classList.remove("is-bounce");
+        });
+        if (bounce && !reduced && index !== lastBounced) {
+          var el = items[index];
+          el.classList.remove("is-bounce");
+          void el.offsetWidth;
+          el.classList.add("is-bounce");
+          lastBounced = index;
+        }
+      }
+
+      function onSettled() {
+        var index = nearestIndex();
+        setActive(index, true);
+        if (index !== lineIndex) {
+          lineIndex = index;
+          setLineHeight(lineHeightFor(index), true);
+        }
+      }
+
+      function onScroll() {
+        var index = nearestIndex();
+        setActive(index, false);
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = setTimeout(onSettled, reduced ? 0 : 90);
+      }
+
+      scroller.addEventListener("scroll", onScroll, { passive: true });
+      scroller.addEventListener("scrollend", function () {
+        if (settleTimer) clearTimeout(settleTimer);
+        onSettled();
+      });
+
+      window.addEventListener("resize", function () {
+        layout();
+        if (lineIndex >= 0) setLineHeight(lineHeightFor(lineIndex), false);
+      });
+
+      if (typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(layout).observe(scroller);
+      }
+
+      layout();
+      setActive(nearestIndex(), false);
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { layout(); });
+      }
+      window.addEventListener("load", layout);
+
+      if (typeof IntersectionObserver !== "undefined") {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) onSettled();
+          });
+        }, { threshold: 0.4 });
+        io.observe(scroller);
+      }
     })();
   </script>
 </body>
