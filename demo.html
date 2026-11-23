@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <title>動效展示｜宇智速 AI 工作室</title>
+  <link rel="icon" href="assets/favicon-64.png">
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+  <meta name="description" content="親手玩玩看六種動效：完成按鈕、勾選聯動、疊卡展開、吸附畫線、慣性滾輪、圓形轉場。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05080f;
+      --bg-elev: #0a101c;
+      --bg-card: rgba(12, 20, 36, 0.82);
+      --line: rgba(0, 229, 255, 0.18);
+      --neon: #00e5ff;
+      --neon-soft: #4de8ff;
+      --neon-dim: rgba(0, 229, 255, 0.45);
+      --accent: #7c5cff;
+      --text: #e8f4ff;
+      --muted: #8fa3b8;
+      --ok: #3dffb5;
+      --warn: #ffb84d;
+      --radius: 22px;
+      --max: 720px;
+      --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --spring: cubic-bezier(.22, 1.2, .36, 1);
+      --bounce: cubic-bezier(.22, 1.4, .36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button, .btn { font-family: inherit; cursor: pointer; border: none; }
+
+    .bg-fx {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 180, 255, 0.18), transparent 55%),
+        radial-gradient(ellipse 40% 30% at 90% 20%, rgba(124, 92, 255, 0.12), transparent 50%),
+        radial-gradient(ellipse 35% 25% at 10% 70%, rgba(0, 229, 255, 0.08), transparent 50%),
+        var(--bg);
+    }
+    .bg-fx::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 75%);
+      pointer-events: none;
+    }
+    .bg-fx::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(0, 229, 255, 0.55) 0.8px, transparent 1.2px);
+      background-size: 72px 72px;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin-inline: auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(5, 8, 15, 0.72);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+      gap: 1rem;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(120, 90, 255, .6);
+      flex: none;
+    }
+    .brand-cn {
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+    }
+    .brand-en {
+      font-size: 0.68rem;
+      letter-spacing: 0.42em;
+      color: var(--neon-dim);
+      font-weight: 500;
+    }
+    .nav-link {
+      font-size: 0.88rem;
+      color: var(--muted);
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .nav-link:hover,
+    .nav-link:focus-visible {
+      color: var(--neon);
+      border-color: rgba(0, 229, 255, 0.25);
+      background: rgba(0, 229, 255, 0.06);
+      outline: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 44px;
+      padding: 0.55rem 1.15rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-ghost {
+      color: var(--neon-soft);
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+    }
+    .btn-ghost:hover,
+    .btn-ghost:focus-visible {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: rgba(0, 229, 255, 0.55);
+      outline: none;
+    }
+    .btn-sm {
+      min-height: 40px;
+      padding: 0.4rem 0.95rem;
+      font-size: 0.84rem;
+    }
+
+    .hero {
+      padding: 1.8rem 0 1.2rem;
+      text-align: center;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      color: var(--neon-dim);
+      margin-bottom: 0.35rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 8vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1.15;
+    }
+    .hero p {
+      margin: 0.55rem auto 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 26em;
+    }
+
+    .demo-list {
+      display: grid;
+      gap: 1.15rem;
+      padding-bottom: 2.8rem;
+    }
+    .demo-card {
+      scroll-margin-top: 80px;
+      border-radius: 28px;
+      padding: 1.2rem 1.1rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 1.2rem; right: 1.2rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent);
+    }
+    .demo-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.7rem;
+      margin-bottom: 0.35rem;
+    }
+    .demo-kicker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--neon-dim);
+    }
+    .demo-card h2 {
+      font-size: 1.2rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+    }
+    .demo-use {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0.25rem 0 0.95rem;
+      line-height: 1.65;
+    }
+    .demo-stage {
+      border-radius: 22px;
+      background: rgba(8, 12, 22, 0.7);
+      border: 1px solid rgba(0, 229, 255, 0.12);
+      padding: 1rem 0.85rem 1.05rem;
+    }
+    .reset-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
+    }
+
+    /* 1. Done button */
+    .done-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 148px;
+    }
+    .done-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .done-btn {
+      position: relative;
+      z-index: 1;
+      min-width: 168px;
+      height: 56px;
+      padding: 0 1.5rem;
+      border-radius: 999px;
+      color: #021018;
+      background: linear-gradient(135deg, #9b87ff, #7c5cff 40%, #5a8cff);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset, 0 8px 28px rgba(124, 92, 255, 0.35);
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      overflow: visible;
+      transition:
+        width .48s var(--spring),
+        min-width .48s var(--spring),
+        padding .48s var(--spring),
+        border-radius .48s var(--spring),
+        background .35s ease,
+        box-shadow .35s ease,
+        transform .45s var(--bounce);
+    }
+    .done-btn.is-doing,
+    .done-btn.is-done {
+      width: 56px;
+      min-width: 56px;
+      padding: 0;
+      border-radius: 50%;
+    }
+    .done-btn.is-done {
+      background: #3dffb5;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset, 0 0 28px rgba(61, 255, 181, 0.45);
+      transform: scale(1);
+    }
+    .done-label {
+      display: inline-block;
+      transition: opacity .2s ease, transform .28s ease;
+    }
+    .done-btn.is-doing .done-label,
+    .done-btn.is-done .done-label {
+      opacity: 0;
+      transform: scale(0.55);
+    }
+    .done-check {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 28px;
+      height: 28px;
+      color: #04231a;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .done-check path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 28;
+      stroke-dashoffset: 28;
+    }
+    .done-btn.is-done .done-check { opacity: 1; }
+    .done-btn.is-done .done-check path {
+      animation: draw-check .42s .12s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+    @keyframes draw-check {
+      to { stroke-dashoffset: 0; }
+    }
+    .done-particle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: var(--sz, 8px);
+      height: var(--sz, 8px);
+      margin: calc(var(--sz, 8px) / -2) 0 0 calc(var(--sz, 8px) / -2);
+      border-radius: var(--rad, 50%);
+      background: var(--c, #3dffb5);
+      animation: particle-burst .72s cubic-bezier(.12, .72, .22, 1) forwards;
+    }
+    @keyframes particle-burst {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0.15); opacity: 0; }
+    }
+
+    /* 2. Checklist + ring */
+    .check-meter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+    .ring-wrap {
+      width: 84px;
+      height: 84px;
+      position: relative;
+    }
+    .ring-wrap svg {
+      width: 84px;
+      height: 84px;
+      transform: rotate(-90deg);
+    }
+    .ring-bg {
+      fill: none;
+      stroke: rgba(0, 229, 255, 0.12);
+      stroke-width: 8;
+    }
+    .ring-fg {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      transition: stroke-dashoffset .45s var(--spring), stroke .35s ease;
+    }
+    .check-meter.is-complete .ring-fg { stroke: var(--ok); }
+    .check-count {
+      display: flex;
+      align-items: baseline;
+      gap: 0.15rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .check-count strong {
+      font-size: 2.15rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      display: inline-block;
+      transform-origin: center bottom;
+    }
+    .check-count span {
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .check-meter.is-pop .check-count strong {
+      animation: pop-num .48s var(--bounce);
+    }
+    .check-meter.is-pop .ring-wrap {
+      animation: pop-num .48s var(--bounce);
+    }
+    @keyframes pop-num {
+      0% { transform: scale(1); }
+      38% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .check-list {
+      list-style: none;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .check-list label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 52px;
+      padding: 0.55rem 0.8rem;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0, 229, 255, 0.12);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      transition: background .25s ease, border-color .25s ease, transform .35s var(--bounce);
+    }
+    .check-list input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      border: 2px solid rgba(0, 229, 255, 0.4);
+      background: #0b1220;
+      display: grid;
+      place-items: center;
+      flex: none;
+      transition: background .25s ease, border-color .25s ease, transform .35s var(--bounce);
+    }
+    .check-list input::after {
+      content: "";
+      width: 12px;
+      height: 7px;
+      border-left: 2.4px solid #04231a;
+      border-bottom: 2.4px solid #04231a;
+      transform: rotate(-45deg) translate(1px, -1px) scale(0);
+      transition: transform .28s var(--spring);
+    }
+    .check-list input:checked {
+      background: var(--ok);
+      border-color: var(--ok);
+      transform: scale(1.08);
+    }
+    .check-list input:checked::after { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
+    .check-list label.is-on {
+      background: color-mix(in srgb, var(--ok) 14%, transparent);
+      border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+    }
+
+    /* 3. Stack */
+    .stack-wrap { padding: 0.2rem 0.15rem 0.3rem; }
+    .stack {
+      position: relative;
+      height: 168px;
+      transition: height .55s var(--spring);
+    }
+    .stack.is-open { height: 368px; }
+    .stack-card {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 80px;
+      border-radius: 22px;
+      padding: 0 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1.12rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: #04231a;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+      transform-origin: center top;
+      transition: transform .55s var(--spring), box-shadow .4s ease, filter .3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .stack-card .hint {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      opacity: 0.7;
+    }
+    .stack-card[data-tone="accent"] { background: #7c5cff; color: #f7f3ff; }
+    .stack-card[data-tone="ok"] { background: #3dffb5; color: #04231a; }
+    .stack-card[data-tone="warn"] { background: #ffb84d; color: #2a1a04; }
+    .stack-card[data-tone="neon"] { background: #00e5ff; color: #021018; }
+    .stack-picked {
+      min-height: 1.4em;
+      margin-top: 0.7rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .stack-picked.is-on { color: var(--ok); }
+
+    /* 4. Flow snap + line */
+    .flow-scroller {
+      position: relative;
+      height: min(52svh, 400px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      border-radius: 18px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 229, 255, 0.35) transparent;
+    }
+    .flow-scroller::-webkit-scrollbar { width: 6px; }
+    .flow-scroller::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.28);
+      border-radius: 99px;
+    }
+    .flow-list { position: relative; }
+    .flow-rail {
+      position: absolute;
+      left: 0; top: 0;
+      width: 3px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .flow-rail-dash {
+      position: absolute;
+      inset: 0;
+      border-left: 2px dashed rgba(0, 229, 255, 0.32);
+      margin-left: 0.5px;
+    }
+    .flow-rail-solid {
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 0;
+      border-radius: 3px;
+      background: linear-gradient(180deg, var(--neon), var(--accent));
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+      transform-origin: top center;
+    }
+    .flow-rail-solid.is-animating {
+      transition: height 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .flow-item {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      column-gap: 0.9rem;
+      align-items: center;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      padding-inline: 0.7rem;
+    }
+    .flow-item + .flow-item { margin-top: 1.25rem; }
+    .flow-node {
+      width: 14px;
+      height: 14px;
+      justify-self: center;
+      border-radius: 50%;
+      background: #0b1220;
+      border: 2px solid rgba(0, 229, 255, 0.4);
+      box-shadow: 0 0 0 4px rgba(5, 8, 15, 0.9);
+      transition: background .35s ease, border-color .35s ease, transform .4s var(--spring), box-shadow .35s ease;
+    }
+    .flow-item.is-passed .flow-node,
+    .flow-item.is-active .flow-node {
+      border-color: var(--flow-tone, var(--neon));
+      background: var(--flow-tone, var(--neon));
+      box-shadow: 0 0 0 4px rgba(5, 8, 15, 0.9), 0 0 12px color-mix(in srgb, var(--flow-tone, var(--neon)) 70%, transparent);
+    }
+    .flow-item.is-active .flow-node { transform: scale(1.28); }
+    .flow-item[data-tone="accent"] { --flow-tone: #9b87ff; }
+    .flow-item[data-tone="ok"] { --flow-tone: #3dffb5; }
+    .flow-item[data-tone="warn"] { --flow-tone: #ffb84d; }
+    .flow-item[data-tone="neon"] { --flow-tone: #00e5ff; }
+    .flow-card {
+      border-radius: 22px;
+      padding: 1.05rem 1rem 1.15rem;
+      background: rgba(10, 16, 28, 0.88);
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+      transform: scale(0.96);
+      transform-origin: left center;
+      transition: transform .45s var(--spring), background .35s ease, color .35s ease, border-color .35s ease, box-shadow .45s ease;
+    }
+    .flow-card .flow-kicker {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--neon-dim);
+      margin-bottom: 0.3rem;
+    }
+    .flow-card h3 {
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+    }
+    .flow-card p { color: var(--muted); font-size: 0.86rem; line-height: 1.65; }
+    .flow-item.is-active .flow-card {
+      transform: scale(1);
+      border-color: color-mix(in srgb, var(--flow-tone, var(--neon)) 55%, transparent);
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.35),
+        0 0 0 1px color-mix(in srgb, var(--flow-tone, var(--neon)) 30%, transparent),
+        0 12px 36px color-mix(in srgb, var(--flow-tone, var(--neon)) 22%, transparent);
+    }
+    .flow-item.is-active.is-bounce .flow-card {
+      animation: flow-bounce .7s var(--spring);
+    }
+    .flow-item[data-tone="accent"].is-active .flow-card { background: #7c5cff; color: #f7f3ff; border-color: #9b87ff; }
+    .flow-item[data-tone="ok"].is-active .flow-card { background: #3dffb5; color: #04231a; border-color: #7affcc; }
+    .flow-item[data-tone="warn"].is-active .flow-card { background: #ffb84d; color: #2a1a04; border-color: #ffd28a; }
+    .flow-item[data-tone="neon"].is-active .flow-card { background: #00e5ff; color: #021018; border-color: #7af3ff; }
+    .flow-item.is-active .flow-card .flow-kicker,
+    .flow-item.is-active .flow-card p { color: inherit; }
+    .flow-item.is-active .flow-card .flow-kicker { opacity: 0.78; }
+    .flow-item.is-active .flow-card p { opacity: 0.9; }
+    @keyframes flow-bounce {
+      0% { transform: scale(0.97); }
+      45% { transform: scale(1.035); }
+      100% { transform: scale(1); }
+    }
+    .flow-hint {
+      margin-top: 0.55rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* 5. Wheel */
+    .wheel-block { padding: 0.2rem 0 0.15rem; }
+    .wheel-viewport {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+      cursor: grab;
+    }
+    .wheel-viewport.is-dragging { cursor: grabbing; }
+    .wheel-highlight {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 50%;
+      height: 44px;
+      margin-top: -22px;
+      border-radius: 14px;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .wheel-track {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      will-change: transform;
+    }
+    .wheel-item {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      opacity: 0.35;
+    }
+    .wheel-item.is-selected {
+      color: #fff;
+      font-weight: 900;
+      opacity: 1;
+    }
+    .wheel-readout {
+      margin-top: 0.75rem;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .wheel-readout strong {
+      color: var(--ok);
+      font-size: 1.25rem;
+      font-variant-numeric: tabular-nums;
+      margin-left: 0.2rem;
+    }
+
+    /* 6. Tab circle transition */
+    .app-shell {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      background: #070c16;
+      border: 1px solid rgba(0, 229, 255, 0.16);
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-pages {
+      position: relative;
+      flex: 1;
+      min-height: 260px;
+      overflow: hidden;
+    }
+    .tab-page {
+      position: absolute;
+      inset: 0;
+      padding: 1.3rem 1.15rem;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+    .tab-page.is-active { display: flex; z-index: 1; }
+    .tab-page.is-enter,
+    .tab-page.is-leave {
+      display: flex;
+    }
+    .tab-page.is-enter { z-index: 3; }
+    .tab-page.is-leave { z-index: 1; }
+    .tab-page[data-tone="accent"] { background: linear-gradient(180deg, rgba(124,92,255,0.35), rgba(7,12,22,0.2) 70%), #0c1020; }
+    .tab-page[data-tone="ok"] { background: linear-gradient(180deg, rgba(61,255,181,0.28), rgba(7,12,22,0.2) 70%), #0c1020; }
+    .tab-page[data-tone="warn"] { background: linear-gradient(180deg, rgba(255,184,77,0.3), rgba(7,12,22,0.2) 70%), #0c1020; }
+    .tab-page[data-tone="neon"] { background: linear-gradient(180deg, rgba(0,229,255,0.3), rgba(7,12,22,0.2) 70%), #0c1020; }
+    .tab-page .kicker {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      opacity: 0.75;
+    }
+    .tab-page h3 {
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+    }
+    .tab-page p { color: var(--muted); font-size: 0.9rem; max-width: 16em; }
+    .tab-bar {
+      position: relative;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid rgba(0, 229, 255, 0.14);
+      background: rgba(6, 10, 18, 0.96);
+    }
+    .tab-bar button {
+      min-height: 60px;
+      background: none;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.35rem 0 0.45rem;
+      transition: color .25s ease, transform .35s var(--bounce);
+    }
+    .tab-bar button svg { width: 22px; height: 22px; }
+    .tab-bar button.is-on {
+      color: var(--neon);
+      transform: translateY(-1px);
+    }
+    .tab-ripple {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      transform: scale(0);
+      opacity: 0;
+    }
+    .tab-ripple.is-run {
+      animation: tab-expand .7s var(--spring) forwards;
+    }
+    @keyframes tab-expand {
+      0% { transform: scale(0); opacity: 0.95; }
+      70% { opacity: 0.85; }
+      100% { transform: scale(var(--grow, 28)); opacity: 0; }
+    }
+
+    footer {
+      padding: 1.6rem 0 2.2rem;
+      border-top: 1px solid rgba(0, 229, 255, 0.1);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .footer-brand { font-weight: 700; color: #c5d8ea; letter-spacing: 0.06em; }
+    .footer-en { letter-spacing: 0.4em; font-size: 0.7rem; color: rgba(0, 229, 255, 0.4); margin-top: 0.25rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .done-btn, .done-label, .flow-card, .flow-node, .flow-rail-solid,
+      .stack, .stack-card, .check-list label, .check-list input,
+      .ring-fg, .tab-bar button {
+        transition: none !important;
+        animation: none !important;
+      }
+      .done-btn.is-done .done-check path {
+        animation: none !important;
+        stroke-dashoffset: 0;
+      }
+      .check-meter.is-pop .check-count strong,
+      .check-meter.is-pop .ring-wrap,
+      .flow-item.is-active.is-bounce .flow-card,
+      .tab-ripple.is-run {
+        animation: none !important;
+      }
+      .done-particle { animation: none !important; opacity: 0; }
+      .flow-rail-solid.is-animating { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-fx" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="index.html" aria-label="回到宇智速首頁">
+        <img class="brand-logo" src="assets/logo-192.png" alt="" width="36" height="36">
+        <span class="brand-cn">宇智速</span>
+        <span class="brand-en">YZSU</span>
+      </a>
+      <a class="nav-link" href="index.html">返回首頁</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <header class="hero">
+      <span class="eyebrow">PLAYGROUND</span>
+      <h1>動效展示</h1>
+      <p>下面六張都可以親手玩。每種效果旁邊都寫了適合用在哪，玩完按「再玩一次」就能重來。</p>
+    </header>
+
+    <div class="demo-list">
+      <article class="demo-card" id="demo-done">
+        <div class="demo-head">
+          <div>
+            <div class="demo-kicker">01</div>
+            <h2>完成按鈕</h2>
+          </div>
+        </div>
+        <p class="demo-use">適合用在「加入購物車」或掃碼成功：按鈕縮成圓、畫出打勾，再爆出小粒子，一眼就知道完成了。</p>
+        <div class="demo-stage">
+          <div class="done-stage">
+            <div class="done-burst" id="done-burst" aria-hidden="true"></div>
+            <button type="button" class="done-btn" id="done-btn">
+              <span class="done-label">完成</span>
+              <svg class="done-check" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12.5l5 5 9-10"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="done-reset">再玩一次</button>
+        </div>
+      </article>
+
+      <article class="demo-card" id="demo-check">
+        <div class="demo-head">
+          <div>
+            <div class="demo-kicker">02</div>
+            <h2>勾選聯動</h2>
+          </div>
+        </div>
+        <p class="demo-use">適合用在出貨清單或待辦清單：勾一項，上面的進度圈和數字會跟著跳一下。</p>
+        <div class="demo-stage">
+          <div class="check-meter" id="check-meter">
+            <div class="ring-wrap" aria-hidden="true">
+              <svg viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="28"></circle>
+                <circle class="ring-fg" id="check-ring" cx="40" cy="40" r="28" pathLength="100"></circle>
+              </svg>
+            </div>
+            <div class="check-count">
+              <strong id="check-num">0</strong>
+              <span>/ 4</span>
+            </div>
+          </div>
+          <ul class="check-list" id="check-list">
+            <li><label><input type="checkbox" data-check-item> 美式咖啡 × 2</label></li>
+            <li><label><input type="checkbox" data-check-item> 起司漢堡 × 1</label></li>
+            <li><label><input type="checkbox" data-check-item> 薯條（大）× 1</label></li>
+            <li><label><input type="checkbox" data-check-item> 紅茶 × 2</label></li>
+          </ul>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="check-reset">再玩一次</button>
+        </div>
+      </article>
+
+      <article class="demo-card" id="demo-stack">
+        <div class="demo-head">
+          <div>
+            <div class="demo-kicker">03</div>
+            <h2>疊卡展開</h2>
+          </div>
+        </div>
+        <p class="demo-use">適合用在商品分類：一疊彩色卡片點一下就攤開，再點其中一張就能選。</p>
+        <div class="demo-stage">
+          <div class="stack-wrap">
+            <div class="stack" id="stack" role="button" tabindex="0" aria-expanded="false" aria-label="商品分類疊卡，點一下展開">
+              <button type="button" class="stack-card" data-tone="accent" data-name="飲品" style="z-index:4">飲品<span class="hint">DRINKS</span></button>
+              <button type="button" class="stack-card" data-tone="ok" data-name="主餐" style="z-index:3">主餐<span class="hint">MAINS</span></button>
+              <button type="button" class="stack-card" data-tone="warn" data-name="點心" style="z-index:2">點心<span class="hint">SIDES</span></button>
+              <button type="button" class="stack-card" data-tone="neon" data-name="優惠" style="z-index:1">優惠<span class="hint">DEALS</span></button>
+            </div>
+            <p class="stack-picked" id="stack-picked">點這疊卡片，看它攤開</p>
+          </div>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="stack-reset">再玩一次</button>
+        </div>
+      </article>
+
+      <article class="demo-card" id="demo-flow">
+        <div class="demo-head">
+          <div>
+            <div class="demo-kicker">04</div>
+            <h2>吸附畫線</h2>
+          </div>
+        </div>
+        <p class="demo-use">適合用在介紹服務流程：卡片滑到中間會吸住，線再畫到下一步。官網「怎麼合作」用的就是這個。</p>
+        <div class="demo-stage">
+          <div class="flow-scroller" id="demo-flow-scroller" tabindex="0" aria-label="示範流程，上下滑動切換步驟">
+            <div class="flow-list" id="demo-flow-list">
+              <div class="flow-rail" id="demo-flow-rail" aria-hidden="true">
+                <div class="flow-rail-dash"></div>
+                <div class="flow-rail-solid" id="demo-flow-solid"></div>
+              </div>
+              <article class="flow-item" data-tone="accent" data-step="0">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">01</div>
+                  <h3>選好商品</h3>
+                  <p>先把要的東西放進清單，下一步再確認。</p>
+                </div>
+              </article>
+              <article class="flow-item" data-tone="ok" data-step="1">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">02</div>
+                  <h3>確認訂單</h3>
+                  <p>卡片吸到中間時，連線就會畫下來。</p>
+                </div>
+              </article>
+              <article class="flow-item" data-tone="warn" data-step="2">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">03</div>
+                  <h3>出貨包裝</h3>
+                  <p>繼續往下滑，看線條跟著走到這一步。</p>
+                </div>
+              </article>
+              <article class="flow-item" data-tone="neon" data-step="3">
+                <div class="flow-node" aria-hidden="true"></div>
+                <div class="flow-card">
+                  <div class="flow-kicker">04</div>
+                  <h3>完成配送</h3>
+                  <p>到最後一步，整條線就畫完了。</p>
+                </div>
+              </article>
+            </div>
+          </div>
+          <p class="flow-hint">在框裡上下滑動，鬆手後會吸到最近的那張</p>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="flow-reset">再玩一次</button>
+        </div>
+      </article>
+
+      <article class="demo-card" id="demo-wheel">
+        <div class="demo-head">
+          <div>
+            <div class="demo-kicker">05</div>
+            <h2>慣性滾輪</h2>
+          </div>
+        </div>
+        <p class="demo-use">適合用在選數量、尺寸或時間：像轉 iPhone 鬧鐘那樣，有慣性，轉過頭會再彈回來。</p>
+        <div class="demo-stage">
+          <div class="wheel-block">
+            <div class="wheel-viewport" id="qty-wheel" tabindex="0" role="slider" aria-label="選擇數量" aria-valuemin="1" aria-valuemax="20" aria-valuenow="4" aria-valuetext="4 份">
+              <div class="wheel-highlight" aria-hidden="true"></div>
+              <div class="wheel-track" id="qty-track"></div>
+            </div>
+            <p class="wheel-readout">已選數量 <strong id="qty-value">4</strong> 份</p>
+          </div>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="wheel-reset">再玩一次</button>
+        </div>
+      </article>
+
+      <article class="demo-card" id="demo-tabs">
+        <div class="demo-head">
+          <div>
+            <div class="demo-kicker">06</div>
+            <h2>圓形轉場</h2>
+          </div>
+        </div>
+        <p class="demo-use">適合用在底下的分頁切換：畫面會從你點的那顆圖示，擴散成一個圓再換過去。</p>
+        <div class="demo-stage" style="padding:0; overflow:hidden;">
+          <div class="app-shell" id="app-shell">
+            <div class="app-pages" id="app-pages">
+              <section class="tab-page is-active" data-tab="home" data-tone="accent">
+                <div class="kicker">HOME</div>
+                <h3>首頁</h3>
+                <p>點下面其他分頁，看圓從圖示擴散開來。</p>
+              </section>
+              <section class="tab-page" data-tab="list" data-tone="ok">
+                <div class="kicker">LIST</div>
+                <h3>清單</h3>
+                <p>這頁是薄荷綠，圓會從「清單」圖示長出來。</p>
+              </section>
+              <section class="tab-page" data-tab="cart" data-tone="warn">
+                <div class="kicker">CART</div>
+                <h3>購物車</h3>
+                <p>這頁是琥珀色，切過來時圓從購物車擴散。</p>
+              </section>
+              <section class="tab-page" data-tab="me" data-tone="neon">
+                <div class="kicker">ME</div>
+                <h3>我的</h3>
+                <p>這頁是霓虹青，再點「再玩一次」可回到首頁。</p>
+              </section>
+            </div>
+            <div class="tab-ripple" id="tab-ripple" aria-hidden="true"></div>
+            <nav class="tab-bar" id="tab-bar" aria-label="示範分頁">
+              <button type="button" data-tab="home" data-tone="#7c5cff" class="is-on" aria-current="page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8.5z"/></svg>
+                首頁
+              </button>
+              <button type="button" data-tab="list" data-tone="#3dffb5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 7h11M8 12h11M8 17h11"/><path d="M5 7h.01M5 12h.01M5 17h.01"/></svg>
+                清單
+              </button>
+              <button type="button" data-tab="cart" data-tone="#ffb84d">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h2l1.5 10h10L20 8H7"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg>
+                購物車
+              </button>
+              <button type="button" data-tab="me" data-tone="#00e5ff">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.2c1.2-3.2 3.5-4.7 6.5-4.7s5.3 1.5 6.5 4.7"/></svg>
+                我的
+              </button>
+            </nav>
+          </div>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="tabs-reset">再玩一次</button>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-brand">© 2026 宇智速 AI 工作室</div>
+      <div class="footer-en">YZSU</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (reduceMq.addEventListener) {
+        reduceMq.addEventListener("change", function (e) { reduced = e.matches; });
+      } else if (reduceMq.addListener) {
+        reduceMq.addListener(function (e) { reduced = e.matches; });
+      }
+
+      /* 1. Done button */
+      (function () {
+        var btn = document.getElementById("done-btn");
+        var burst = document.getElementById("done-burst");
+        var reset = document.getElementById("done-reset");
+        var checkPath = btn.querySelector(".done-check path");
+        var timer = 0;
+        var colors = ["#3dffb5", "#7c5cff", "#ffb84d", "#00e5ff", "#9b87ff", "#7affcc"];
+
+        if (checkPath && checkPath.getTotalLength) {
+          var len = Math.ceil(checkPath.getTotalLength());
+          checkPath.style.strokeDasharray = String(len);
+          checkPath.style.strokeDashoffset = String(len);
+        }
+
+        function clearParticles() {
+          burst.innerHTML = "";
+        }
+
+        function spawnParticles() {
+          clearParticles();
+          if (reduced) return;
+          var n = 12;
+          for (var i = 0; i < n; i++) {
+            var p = document.createElement("span");
+            p.className = "done-particle";
+            var angle = (Math.PI * 2 * i) / n + (Math.random() * 0.4 - 0.2);
+            var dist = 64 + Math.random() * 52;
+            p.style.setProperty("--dx", (Math.cos(angle) * dist).toFixed(1) + "px");
+            p.style.setProperty("--dy", (Math.sin(angle) * dist).toFixed(1) + "px");
+            p.style.setProperty("--c", colors[i % colors.length]);
+            p.style.setProperty("--sz", (8 + Math.round(Math.random() * 8)) + "px");
+            p.style.setProperty("--rad", i % 3 === 0 ? "3px" : "50%");
+            burst.appendChild(p);
+          }
+        }
+
+        function finish() {
+          if (btn.classList.contains("is-done") || btn.classList.contains("is-doing")) return;
+          btn.classList.add("is-doing");
+          btn.disabled = true;
+          var delay = reduced ? 0 : 280;
+          timer = window.setTimeout(function () {
+            btn.classList.add("is-done");
+            spawnParticles();
+          }, delay);
+        }
+
+        function resetDone() {
+          window.clearTimeout(timer);
+          btn.disabled = false;
+          btn.classList.remove("is-doing", "is-done");
+          clearParticles();
+          if (checkPath) {
+            var d = checkPath.style.strokeDasharray || "28";
+            checkPath.style.strokeDashoffset = d;
+          }
+        }
+
+        btn.addEventListener("click", finish);
+        reset.addEventListener("click", resetDone);
+      })();
+
+      /* 2. Checklist */
+      (function () {
+        var meter = document.getElementById("check-meter");
+        var num = document.getElementById("check-num");
+        var ring = document.getElementById("check-ring");
+        var reset = document.getElementById("check-reset");
+        var boxes = Array.prototype.slice.call(document.querySelectorAll("[data-check-item]"));
+        var total = boxes.length;
+
+        function checkedCount() {
+          return boxes.filter(function (b) { return b.checked; }).length;
+        }
+
+        function render(pop) {
+          var n = checkedCount();
+          num.textContent = String(n);
+          ring.style.strokeDashoffset = String(100 - (n / total) * 100);
+          meter.classList.toggle("is-complete", n === total);
+          boxes.forEach(function (b) {
+            b.closest("label").classList.toggle("is-on", b.checked);
+          });
+          if (pop && !reduced) {
+            meter.classList.remove("is-pop");
+            void meter.offsetWidth;
+            meter.classList.add("is-pop");
+          }
+        }
+
+        boxes.forEach(function (b) {
+          b.addEventListener("change", function () { render(true); });
+        });
+        reset.addEventListener("click", function () {
+          boxes.forEach(function (b) { b.checked = false; });
+          render(false);
+          meter.classList.remove("is-pop");
+        });
+        render(false);
+      })();
+
+      /* 3. Stack */
+      (function () {
+        var stack = document.getElementById("stack");
+        var cards = Array.prototype.slice.call(stack.querySelectorAll(".stack-card"));
+        var picked = document.getElementById("stack-picked");
+        var reset = document.getElementById("stack-reset");
+        var open = false;
+        var selected = "";
+
+        function layout() {
+          cards.forEach(function (card, i) {
+            var t;
+            if (open) {
+              t = "translateY(" + (i * 92) + "px) rotate(0deg) scale(1)";
+            } else {
+              var rot = (i % 2 === 0 ? -1.2 : 1.1) * (i === 0 ? 0.4 : 1);
+              t = "translateY(" + (i * 14) + "px) rotate(" + rot + "deg) scale(" + (1 - i * 0.03) + ")";
+            }
+            card.style.transform = t;
+          });
+          stack.classList.toggle("is-open", open);
+          stack.setAttribute("aria-expanded", open ? "true" : "false");
+          if (selected) {
+            picked.textContent = "已選：" + selected;
+            picked.classList.add("is-on");
+          } else if (open) {
+            picked.textContent = "再點一張卡片試試看";
+            picked.classList.remove("is-on");
+          } else {
+            picked.textContent = "點這疊卡片，看它攤開";
+            picked.classList.remove("is-on");
+          }
+        }
+
+        function openStack() {
+          open = true;
+          layout();
+        }
+
+        stack.addEventListener("click", function (e) {
+          var card = e.target.closest(".stack-card");
+          if (!open) {
+            openStack();
+            return;
+          }
+          if (card) {
+            selected = card.getAttribute("data-name") || "";
+            cards.forEach(function (c) { c.style.filter = c === card ? "brightness(1.08)" : "brightness(0.86)"; });
+            layout();
+          }
+        });
+        stack.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!open) openStack();
+          }
+        });
+        reset.addEventListener("click", function () {
+          open = false;
+          selected = "";
+          cards.forEach(function (c) { c.style.filter = ""; });
+          layout();
+        });
+        layout();
+      })();
+
+      /* 4. Flow snap + line (same idea as the homepage #how block) */
+      (function () {
+        var scroller = document.getElementById("demo-flow-scroller");
+        var list = document.getElementById("demo-flow-list");
+        var rail = document.getElementById("demo-flow-rail");
+        var solid = document.getElementById("demo-flow-solid");
+        var reset = document.getElementById("flow-reset");
+        if (!scroller || !list || !rail || !solid) return;
+
+        var items = Array.prototype.slice.call(list.querySelectorAll(".flow-item"));
+        var nodes = items.map(function (item) { return item.querySelector(".flow-node"); });
+        var settleTimer = null;
+        var lastBounced = -1;
+        var lineIndex = -1;
+        var railStart = 0;
+        var nodeYs = [];
+
+        function nodeCenterInList(node) {
+          var listRect = list.getBoundingClientRect();
+          var r = node.getBoundingClientRect();
+          return (r.top + r.height / 2) - listRect.top;
+        }
+
+        function setLineHeight(h, animate) {
+          solid.classList.toggle("is-animating", !!(animate && !reduced));
+          solid.style.height = h + "px";
+        }
+
+        function lineHeightFor(index) {
+          if (!nodeYs.length) return 0;
+          var endIdx = index >= nodeYs.length - 1 ? nodeYs.length - 1 : index + 1;
+          return Math.max(0, nodeYs[endIdx] - railStart);
+        }
+
+        function layout() {
+          var sh = scroller.clientHeight;
+          if (!items.length || sh < 40) return;
+          var firstH = items[0].offsetHeight;
+          var lastH = items[items.length - 1].offsetHeight;
+          list.style.paddingTop = Math.max(16, (sh - firstH) / 2) + "px";
+          list.style.paddingBottom = Math.max(16, (sh - lastH) / 2) + "px";
+          nodeYs = nodes.map(nodeCenterInList);
+          railStart = nodeYs[0];
+          var railEnd = nodeYs[nodeYs.length - 1];
+          var listRect = list.getBoundingClientRect();
+          var nodeRect = nodes[0].getBoundingClientRect();
+          rail.style.left = (nodeRect.left + nodeRect.width / 2 - listRect.left - 1.5) + "px";
+          rail.style.top = railStart + "px";
+          rail.style.height = Math.max(0, railEnd - railStart) + "px";
+          setLineHeight(lineIndex < 0 ? 0 : lineHeightFor(lineIndex), false);
+        }
+
+        function nearestIndex() {
+          var mid = scroller.scrollTop + scroller.clientHeight / 2;
+          var best = 0;
+          var bestDist = Infinity;
+          for (var i = 0; i < items.length; i++) {
+            var el = items[i];
+            var c = el.offsetTop + el.offsetHeight / 2;
+            var d = Math.abs(c - mid);
+            if (d < bestDist) { bestDist = d; best = i; }
+          }
+          return best;
+        }
+
+        function setActive(index, bounce) {
+          items.forEach(function (el, i) {
+            el.classList.toggle("is-active", i === index);
+            el.classList.toggle("is-passed", i < index);
+            if (i !== index) el.classList.remove("is-bounce");
+          });
+          if (bounce && !reduced && index !== lastBounced) {
+            var el = items[index];
+            el.classList.remove("is-bounce");
+            void el.offsetWidth;
+            el.classList.add("is-bounce");
+            lastBounced = index;
+          }
+        }
+
+        function onSettled() {
+          var index = nearestIndex();
+          setActive(index, true);
+          if (index !== lineIndex) {
+            lineIndex = index;
+            setLineHeight(lineHeightFor(index), true);
+          }
+        }
+
+        function onScroll() {
+          var index = nearestIndex();
+          setActive(index, false);
+          if (settleTimer) clearTimeout(settleTimer);
+          settleTimer = setTimeout(onSettled, reduced ? 0 : 90);
+        }
+
+        scroller.addEventListener("scroll", onScroll, { passive: true });
+        scroller.addEventListener("scrollend", function () {
+          if (settleTimer) clearTimeout(settleTimer);
+          onSettled();
+        });
+        window.addEventListener("resize", function () {
+          layout();
+          if (lineIndex >= 0) setLineHeight(lineHeightFor(lineIndex), false);
+        });
+        if (typeof ResizeObserver !== "undefined") {
+          new ResizeObserver(layout).observe(scroller);
+        }
+        layout();
+        setActive(nearestIndex(), false);
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () { layout(); });
+        }
+        window.addEventListener("load", layout);
+        if (typeof IntersectionObserver !== "undefined") {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) onSettled();
+            });
+          }, { threshold: 0.4 });
+          io.observe(scroller);
+        }
+
+        reset.addEventListener("click", function () {
+          lastBounced = -1;
+          lineIndex = -1;
+          setLineHeight(0, false);
+          scroller.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+          setTimeout(onSettled, reduced ? 0 : 420);
+        });
+      })();
+
+      /* 5. Inertia wheel */
+      (function () {
+        var viewport = document.getElementById("qty-wheel");
+        var track = document.getElementById("qty-track");
+        var readout = document.getElementById("qty-value");
+        var reset = document.getElementById("wheel-reset");
+        var ITEM = 44;
+        var MIN = 1;
+        var MAX = 20;
+        var START = 4;
+        var minY = 0;
+        var maxY = (MAX - MIN) * ITEM;
+        var y = (START - MIN) * ITEM;
+        var vel = 0;
+        var raf = 0;
+        var dragging = false;
+        var lastY = 0;
+        var lastT = 0;
+        var samples = [];
+        var items = [];
+
+        for (var n = MIN; n <= MAX; n++) {
+          var el = document.createElement("div");
+          el.className = "wheel-item";
+          el.textContent = String(n);
+          el.dataset.val = String(n);
+          track.appendChild(el);
+          items.push(el);
+        }
+
+        function valueOf(pos) {
+          var idx = Math.round(pos / ITEM);
+          if (idx < 0) idx = 0;
+          if (idx > MAX - MIN) idx = MAX - MIN;
+          return MIN + idx;
+        }
+
+        function rubber(pos) {
+          if (pos < minY) return minY + (pos - minY) * 0.32;
+          if (pos > maxY) return maxY + (pos - maxY) * 0.32;
+          return pos;
+        }
+
+        function render(pos) {
+          var vis = rubber(pos);
+          var center = viewport.clientHeight / 2 - ITEM / 2;
+          track.style.transform = "translateY(" + (center - vis) + "px)";
+          var cur = valueOf(vis);
+          items.forEach(function (el, i) {
+            var itemCenter = i * ITEM;
+            var dist = Math.abs(itemCenter - vis) / ITEM;
+            var scale = Math.max(0.68, 1 - dist * 0.16);
+            var op = Math.max(0.22, 1 - dist * 0.38);
+            el.style.transform = "scale(" + scale.toFixed(3) + ")";
+            el.style.opacity = String(op);
+            el.classList.toggle("is-selected", MIN + i === cur);
+          });
+          readout.textContent = String(cur);
+          viewport.setAttribute("aria-valuenow", String(cur));
+          viewport.setAttribute("aria-valuetext", cur + " 份");
+        }
+
+        function stopRaf() {
+          if (raf) cancelAnimationFrame(raf);
+          raf = 0;
+        }
+
+        function animateTo(target, duration) {
+          stopRaf();
+          if (reduced) {
+            y = target;
+            vel = 0;
+            render(y);
+            return;
+          }
+          var start = y;
+          var t0 = performance.now();
+          var dur = duration || 420;
+          function step(now) {
+            var t = Math.min(1, (now - t0) / dur);
+            var e = 1 - Math.pow(1 - t, 3);
+            y = start + (target - start) * e;
+            render(y);
+            if (t < 1) raf = requestAnimationFrame(step);
+            else { y = target; vel = 0; render(y); }
+          }
+          raf = requestAnimationFrame(step);
+        }
+
+        function tickMomentum(now) {
+          var dt = Math.min(32, now - lastT) / 1000;
+          lastT = now;
+          y += vel * dt;
+          if (y < minY || y > maxY) {
+            vel *= Math.pow(0.08, dt);
+            var edge = y < minY ? minY : maxY;
+            var spring = (edge - y) * 18;
+            vel += spring * dt;
+            if (Math.abs(edge - y) < 0.6 && Math.abs(vel) < 40) {
+              y = edge;
+              vel = 0;
+              render(y);
+              return;
+            }
+          } else {
+            vel *= Math.pow(0.04, dt);
+          }
+          render(y);
+          if (Math.abs(vel) < 28 && y >= minY && y <= maxY) {
+            var snap = Math.round(y / ITEM) * ITEM;
+            if (snap < minY) snap = minY;
+            if (snap > maxY) snap = maxY;
+            animateTo(snap, 380);
+            return;
+          }
+          raf = requestAnimationFrame(tickMomentum);
+        }
+
+        function startDrag(clientY) {
+          dragging = true;
+          stopRaf();
+          vel = 0;
+          lastY = clientY;
+          lastT = performance.now();
+          samples = [{ y: clientY, t: lastT }];
+          viewport.classList.add("is-dragging");
+        }
+
+        function moveDrag(clientY) {
+          if (!dragging) return;
+          var now = performance.now();
+          var dy = clientY - lastY;
+          y -= dy;
+          lastY = clientY;
+          samples.push({ y: clientY, t: now });
+          if (samples.length > 6) samples.shift();
+          render(y);
+        }
+
+        function endDrag() {
+          if (!dragging) return;
+          dragging = false;
+          viewport.classList.remove("is-dragging");
+          var now = performance.now();
+          var first = samples[0] || { y: lastY, t: now };
+          var dt = Math.max(16, now - first.t) / 1000;
+          vel = -( (lastY - first.y) / dt );
+          if (Math.abs(vel) < 90 || reduced) {
+            var snap = Math.round(rubber(y) / ITEM) * ITEM;
+            if (snap < minY) snap = minY;
+            if (snap > maxY) snap = maxY;
+            y = rubber(y);
+            animateTo(snap, 400);
+            return;
+          }
+          if (y < minY || y > maxY) vel *= 0.45;
+          lastT = now;
+          raf = requestAnimationFrame(tickMomentum);
+        }
+
+        viewport.addEventListener("pointerdown", function (e) {
+          viewport.setPointerCapture(e.pointerId);
+          startDrag(e.clientY);
+        });
+        viewport.addEventListener("pointermove", function (e) {
+          moveDrag(e.clientY);
+        });
+        viewport.addEventListener("pointerup", endDrag);
+        viewport.addEventListener("pointercancel", endDrag);
+
+        viewport.addEventListener("wheel", function (e) {
+          e.preventDefault();
+          stopRaf();
+          y += e.deltaY;
+          var snap = Math.round(rubber(y) / ITEM) * ITEM;
+          if (snap < minY) snap = minY;
+          if (snap > maxY) snap = maxY;
+          if (reduced) { y = snap; render(y); }
+          else animateTo(snap, 280);
+        }, { passive: false });
+
+        viewport.addEventListener("keydown", function (e) {
+          var cur = valueOf(y);
+          if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+            e.preventDefault();
+            animateTo(Math.max(minY, (cur - 1 - MIN) * ITEM), 280);
+          } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+            e.preventDefault();
+            animateTo(Math.min(maxY, (cur + 1 - MIN) * ITEM), 280);
+          }
+        });
+
+        window.addEventListener("resize", function () { render(y); });
+        reset.addEventListener("click", function () {
+          animateTo((START - MIN) * ITEM, 500);
+        });
+        render(y);
+      })();
+
+      /* 6. Tab circle transition */
+      (function () {
+        var shell = document.getElementById("app-shell");
+        var pages = document.getElementById("app-pages");
+        var ripple = document.getElementById("tab-ripple");
+        var bar = document.getElementById("tab-bar");
+        var reset = document.getElementById("tabs-reset");
+        var buttons = Array.prototype.slice.call(bar.querySelectorAll("button[data-tab]"));
+        var current = "home";
+        var busy = false;
+        var tones = { home: "#7c5cff", list: "#3dffb5", cart: "#ffb84d", me: "#00e5ff" };
+
+        function pageEl(id) {
+          return pages.querySelector('.tab-page[data-tab="' + id + '"]');
+        }
+
+        function setButtons(id) {
+          buttons.forEach(function (b) {
+            var on = b.getAttribute("data-tab") === id;
+            b.classList.toggle("is-on", on);
+            if (on) b.setAttribute("aria-current", "page");
+            else b.removeAttribute("aria-current");
+          });
+        }
+
+        function go(id, fromBtn, instant) {
+          if (id === current || busy) return;
+          var next = pageEl(id);
+          var prev = pageEl(current);
+          if (!next || !prev) return;
+          setButtons(id);
+          if (reduced || instant) {
+            prev.classList.remove("is-active", "is-enter", "is-leave");
+            next.style.clipPath = "";
+            next.classList.add("is-active");
+            current = id;
+            return;
+          }
+
+          busy = true;
+          var shellRect = shell.getBoundingClientRect();
+          var pagesRect = pages.getBoundingClientRect();
+          var btnRect = fromBtn ? fromBtn.getBoundingClientRect() : null;
+          var rippleX = shellRect.width / 2;
+          var rippleY = shellRect.height - 30;
+          var originX = pagesRect.width / 2;
+          var originY = pagesRect.height + 30;
+          if (btnRect) {
+            rippleX = btnRect.left + btnRect.width / 2 - shellRect.left;
+            rippleY = btnRect.top + btnRect.height / 2 - shellRect.top;
+            originX = btnRect.left + btnRect.width / 2 - pagesRect.left;
+            originY = btnRect.top + btnRect.height / 2 - pagesRect.top;
+          }
+          var maxX = Math.max(originX, pagesRect.width - originX);
+          var maxY = Math.max(originY, pagesRect.height - originY);
+          var radius = Math.ceil(Math.sqrt(maxX * maxX + maxY * maxY)) + 8;
+
+          ripple.style.left = rippleX + "px";
+          ripple.style.top = rippleY + "px";
+          ripple.style.background = tones[id] || "#00e5ff";
+          ripple.style.setProperty("--grow", String(Math.ceil((radius * 2) / 12)));
+          ripple.classList.remove("is-run");
+          void ripple.offsetWidth;
+          ripple.classList.add("is-run");
+
+          next.classList.add("is-enter");
+          prev.classList.add("is-leave");
+          next.style.clipPath = "circle(0px at " + originX + "px " + originY + "px)";
+          next.style.transition = "clip-path .7s cubic-bezier(.22, 1.15, .36, 1)";
+          void next.offsetWidth;
+          next.style.clipPath = "circle(" + radius + "px at " + originX + "px " + originY + "px)";
+
+          window.setTimeout(function () {
+            prev.classList.remove("is-active", "is-leave");
+            next.classList.remove("is-enter");
+            next.classList.add("is-active");
+            next.style.transition = "";
+            next.style.clipPath = "";
+            ripple.classList.remove("is-run");
+            current = id;
+            busy = false;
+          }, 720);
+        }
+
+        buttons.forEach(function (b) {
+          b.addEventListener("click", function () {
+            go(b.getAttribute("data-tab"), b, false);
+          });
+        });
+        reset.addEventListener("click", function () {
+          if (current === "home") return;
+          var homeBtn = bar.querySelector('button[data-tab="home"]');
+          go("home", homeBtn, reduced);
+        });
+      })();
+    })();
+  </script>
+</body>
+</html>
