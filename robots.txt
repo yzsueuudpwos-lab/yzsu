@@ -1,0 +1,8 @@
+# 這個檔會放在 https://yzsueuudpwos-lab.github.io/yzsu/robots.txt
+# Google 不會自動讀專案子路徑下的 robots.txt，請看預覽包說明。
+# 以後若改成自己的網域（網站在網域根目錄），這個檔就會生效。
+
+User-agent: *
+Allow: /
+
+Sitemap: https://yzsueuudpwos-lab.github.io/yzsu/sitemap.xml
